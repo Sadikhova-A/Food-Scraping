@@ -45,10 +45,17 @@ bar_code = Bar_ID()
 link = "https://world.openfoodfacts.org/product/" + str(bar_code)
 tables = pd.read_html(link)
 
-# Creating a Data Frame that only includes the necessary information
+# Accessing the first table off the website
 df = pd.DataFrame(tables[0])
 pd.set_option('expand_frame_repr', False)
+
+# Formating to only keep the necessary information
 df = df.drop(df.columns[-1], axis=1)
 macros = ['Nutrition facts', 'Energy', 'Fat', 'Proteins', 'Carbohydrates']
-df = df[df['Nutrition facts'].isin(macros)]
-print(df)
+df2 = df[df['Nutrition facts'].isin(macros)]
+
+# Renaming entrees and columns for clarity
+macros = {'Carbohydrates': 'Carbs', 'Proteins': 'Protein'}
+df2 = df2.replace(macros)
+df2 = df2.rename(columns={'As sold for 100 g / 100 ml': 'Per 100 g/ml'})
+print(df2)
