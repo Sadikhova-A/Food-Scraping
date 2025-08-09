@@ -13,6 +13,7 @@ Description: Starts a video capture, and decodes visible Bar/QR codes.
 Returns: The utf-8 code data. 
 '''
 
+
 # Identify a bar code
 def Bar_ID():
     # Video capture and window initialisation
@@ -45,17 +46,25 @@ bar_code = Bar_ID()
 link = "https://world.openfoodfacts.org/product/" + str(bar_code)
 tables = pd.read_html(link)
 
+# Initialising dictionaries and lists that will later be column and index names
+macros = ['Energy', 'Proteins', 'Carbohydrates', 'Fat']
+row_names = {'Carbohydrates': 'Carbs', 'Proteins': 'Protein'}
+column_names = {'As sold for 100 g / 100 ml': 'Per 100 g/ml', 'Nutrition facts': 'Nutrition'}
+
 # Accessing the first table off the website
 df = pd.DataFrame(tables[0])
 pd.set_option('expand_frame_repr', False)
 
 # Formating to only keep the necessary information
-df = df.drop(df.columns[-1], axis=1)
-macros = ['Nutrition facts', 'Energy', 'Fat', 'Proteins', 'Carbohydrates']
-df2 = df[df['Nutrition facts'].isin(macros)]
+df = df[['Nutrition facts', 'As sold for 100 g / 100 ml']]
+df = df[df['Nutrition facts'].isin(macros)]
+
+# Standardising index order
+df = df.set_index('Nutrition facts')
+df2 = df.reindex(macros)
+df2 = df.reset_index()
 
 # Renaming entrees and columns for clarity
-macros = {'Carbohydrates': 'Carbs', 'Proteins': 'Protein'}
-df2 = df2.replace(macros)
-df2 = df2.rename(columns={'As sold for 100 g / 100 ml': 'Per 100 g/ml'})
+df2 = df2.replace(row_names)
+df2 = df2.rename(columns=column_names)
 print(df2)
